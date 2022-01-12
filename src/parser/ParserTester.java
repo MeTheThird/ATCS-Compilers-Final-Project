@@ -34,7 +34,7 @@ public class ParserTester
             Environment env = new Environment();
 
             Program program = parser.parseProgram();
-            // eval.exec(program, env);
+            eval.exec(program, env);
         }
         catch(FileNotFoundException e)
         {

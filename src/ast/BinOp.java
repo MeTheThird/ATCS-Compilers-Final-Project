@@ -4,11 +4,11 @@ package ast;
  * BinOp represents binary operator expressions
  * 
  * @author Rohan Thakur
- * @version 1/10/22
+ * @version 1/11/22
  */
 public class BinOp extends Expression
 {
-// TODO: note that the op could be a relop
+
     private String op;
     private Expression exp1;
     private Expression exp2;

@@ -1,5 +1,7 @@
 package evaluator;
 
+import java.util.Scanner;
+
 import ast.*;
 import ast.Number;
 import environment.Environment;
@@ -12,12 +14,11 @@ import environment.Environment;
  */
 public class Evaluator
 {
-
     /**
      * Executes the input program under the input environment
      * 
      * @param program the input program
-     * @param env the environment to use for variables and procedures
+     * @param env the environment to use for variables
      */
     public void exec(Program program, Environment env)
     {
@@ -28,7 +29,7 @@ public class Evaluator
      * Executes the input statement
      * 
      * @param stmt the input statement
-     * @param env the environment to use for variables and procedures
+     * @param env the environment to use for variables
      */
     private void exec(Statement stmt, Environment env)
     {
@@ -37,59 +38,73 @@ public class Evaluator
         else if (stmt.getClass() == If.class) exec((If) stmt, env);
         else exec((While) stmt, env);
     }
-// TODO: read statements
+
     /**
-     * Executes the input Writeln statement
+     * Executes the input display statement
      * 
-     * @param writeln the input Writeln statement
-     * @param env the environment to use for variables and procedures
+     * @param display the input Display statement
+     * @param env the environment to use for variables
      */
-    private void exec(Display writeln, Environment env)
+    private void exec(Display display, Environment env)
     {
-        System.out.println(eval(writeln.getExpression(), env));
+        System.out.println(eval(display.getExpression(), env));
+        if (display.getReadStmt() != null) exec(display.getReadStmt(), env);
     }
 
     /**
-     * Executes the input Assignment statement
+     * Executes the input read statement
      * 
-     * @param assignment the input Assignment statement
-     * @param env the environment to use for variables and procedures
+     * @param readStmt the input Read statement
+     * @param env the environment to use for variables
      */
-    private void exec(Assign assignment, Environment env)
+    private void exec(Read readStmt, Environment env)
     {
-        env.setVariable(assignment.getVar(), eval(assignment.getExp(), env));
+        System.out.print("Enter a value for the variable " + readStmt.getVar() + ": ");
+        Scanner scanner = new Scanner(System.in);
+        int val = Integer.parseInt(scanner.nextLine());
+        scanner.close();
+        env.setVariable(readStmt.getVar(), val);
     }
-// TODO: if-else statements -- else and getFalseProgram != null
+
     /**
-     * Executes the input If statement
+     * Executes the input assign statement
+     * 
+     * @param assign the input Assign statement
+     * @param env the environment to use for variables
+     */
+    private void exec(Assign assign, Environment env)
+    {
+        env.setVariable(assign.getVar(), eval(assign.getExp(), env));
+    }
+
+    /**
+     * Executes the input if/if-else statement
      * 
      * @param ifStmt the input If statement
-     * @param env the environment to use for variables and procedures
+     * @param env the environment to use for variables
      */
     private void exec(If ifStmt, Environment env)
     {
-        if (eval(ifStmt.getExpression(), env) != 0) exec(ifStmt.getStmt(), env);
+        if (eval(ifStmt.getExpression(), env) != 0) exec(ifStmt.getTrueProgram(), env);
+        else if (ifStmt.getFalseProgram() != null) exec(ifStmt.getFalseProgram(), env);
     }
 
     /**
      * Executes the input While statement
      * 
      * @param whileStmt the input While statement
-     * @param env the environment to use for variables and procedures
+     * @param env the environment to use for variables
      */
     private void exec(While whileStmt, Environment env)
     {
-        while (eval(whileStmt.getExpression(), env) != 0) exec(whileStmt.getStmt(), env);
+        while (eval(whileStmt.getExpression(), env) != 0) exec(whileStmt.getProgram(), env);
     }
-// TODO: for evaluating BinOps, check if the string contains a relop -- return 0 if false, 1 if true
-// TODO: that simplifies the If statement cond checking bc we just need to check if it's neq to 0
-// TODO: that also means that we'd print out 0/1 for printing out boolean expressions rather than
-// TODO: true/false
+
     /**
      * Evaluates the input expression
      * 
      * @param exp the input expression
-     * @param env the environment to use for variables and procedures
+     * @param env the environment to use for variables
      * @return the value of the input expression
      */
     private int eval(Expression exp, Environment env)
@@ -103,7 +118,7 @@ public class Evaluator
      * Evaluates the input Number object
      * 
      * @param num the input Number object
-     * @param env the environment to use for variables and procedures
+     * @param env the environment to use for variables
      * @return the value of the input Number object
      */
     private int eval(Number num, Environment env)
@@ -115,7 +130,7 @@ public class Evaluator
      * Evaluates the input Variable
      * 
      * @param var the input Variable
-     * @param env the environment to use for variables and procedures
+     * @param env the environment to use for variables
      * @return the value of the input Variable
      */
     private int eval(Variable var, Environment env)
@@ -127,7 +142,7 @@ public class Evaluator
      * Evaluates the input BinOp expression
      * 
      * @param binop the input BinOp expression
-     * @param env the environment to use for variables and procedures
+     * @param env the environment to use for variables
      * @return the value of the input BinOp expression, taking the value of boolean expressions to
      * be 1 if true and 0 if false
      */
