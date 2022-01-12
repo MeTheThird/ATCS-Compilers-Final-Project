@@ -47,6 +47,7 @@ public class Parser
      */
     private void eat(String expected) throws IllegalArgumentException
     {
+        // System.out.println("expected: " + expected + ", currentToken: " + currentToken);
         if (expected.equals(currentToken))
         {
             try
@@ -78,27 +79,12 @@ public class Parser
 
         Statement stmt = parseStatement();
         stmts.add(stmt);
-        while (!currentToken.equals("END"))
+        while (!currentToken.equals("end") && !currentToken.equals("else"))
         {
             stmt = parseStatement();
             stmts.add(stmt);
         }
         return new Program(stmts);
-    }
-
-    /**
-     * Parses the current integer
-     *
-     * @precondition currentToken is an integer
-     * @postcondition currentToken has advanced past the parsed integer token, the current integer
-     * token has been eaten
-     * @return an Expression AST object that represents the parsed integer
-     */
-    private Expression parseNumber()
-    {
-        int numVal = Integer.parseInt(currentToken);
-        eat(currentToken);
-        return new Number(numVal);
     }
 
     /**
@@ -116,7 +102,7 @@ public class Parser
         {
             case "display":
                 eat("display");
-                Expression exp = parseExpr();
+                Expression displayExpression = parseExpression();
                 Read readStmt = null;
                 if (currentToken.equals("read"))
                 {
@@ -124,121 +110,38 @@ public class Parser
                     readStmt = new Read(currentToken);
                     eat(currentToken);
                 }
-                return new Display(exp, readStmt);
+                return new Display(displayExpression, readStmt);
 
-            case "IF":
-                eat("IF");
-                Condition cond = parseCondition();
-                eat("THEN");
-                Statement stmt = parseStatement();
-                return new If(cond, stmt);
-
-            case "WHILE":
-                eat("WHILE");
-                cond = parseCondition();
-                eat("DO");
-                stmt = parseStatement();
-                return new While(cond, stmt);
-
-            default:
+            case "assign":
+                eat("assign");
                 String varName = currentToken;
                 eat(currentToken);
-                eat(":=");
-                Expression varVal = parseExpr();
-                eat(";");
-                return new Assign(varName, varVal);
-        }
-    }
-
-    /**
-     * Parses the current condition expression and returns a new AST Condition object with the
-     * parameters of the current condition expression
-     *
-     * @precondition currentToken begins a condition expression
-     * @postcondition currentToken has been advanced past the current condition expression, all of
-     * the condition expression's associated tokens have been eaten
-     * @return a Condition AST object that represents the parsed condition expression
-     */
-    private Condition parseCondition()
-    {
-        Expression exp1 = parseExpr();
-        String relop = currentToken;
-        switch (relop)
-        {
-            case "=":
                 eat("=");
-                break;
-            case "<>":
-                eat("<>");
-                break;
-            case "<":
-                eat("<");
-                break;
-            case ">":
-                eat(">");
-                break;
-            case "<=":
-                eat("<=");
-                break;
+                Expression varVal = parseExpression();
+                return new Assign(varName, varVal);
+
+            case "while":
+                eat("while");
+                Expression whileExpression = parseExpression();
+                eat("do");
+                Program whileProgram = parseProgram();
+                eat("end");
+                return new While(whileExpression, whileProgram);
+
             default:
-                eat(">=");
-                break;
+                eat("if");
+                Expression ifExpression = parseExpression();
+                eat("then");
+                Program ifTrueProgram = parseProgram();
+                Program ifFalseProgram = null;
+                if (!currentToken.equals("end"))
+                {
+                    eat("else");
+                    ifFalseProgram = parseProgram();
+                }
+                eat("end");
+                return new If(ifExpression, ifTrueProgram, ifFalseProgram);
         }
-        Expression exp2 = parseExpr();
-        return new Condition(relop, exp1, exp2);
-    }
-
-    /**
-     * Parses the current numeric factor where a factor represents any integer expression that might
-     * be multiplied or divided with other factors
-     *
-     * @precondition currentToken begins a factor
-     * @postcondition currentToken has advanced past the current factor, all of the factor's
-     * associated tokens have been eaten
-     * @return an Expression AST object that represents the parsed factor
-     */
-    private Expression parseFactor()
-    {
-        if (currentToken.equals("("))
-        {
-            eat("(");
-            Expression ret = parseExpr();
-            eat(")");
-            return ret;
-        }
-        else if (currentToken.equals("-"))
-        {
-            eat("-");
-            return new BinOp("*", new Number(-1), parseFactor());
-        }
-        else if (currentToken.matches("[0-9]+"))
-        {
-            return parseNumber();
-        }
-        String id = currentToken;
-        eat(id);
-        return new Variable(id);
-    }
-
-    /**
-     * Parses the current numeric term where a term represents any integer expression that might be
-     * added or subtracted with other terms
-     *
-     * @precondition currentToken begins a term
-     * @postcondition currentToken has advanced past the current term, all of the term's associated
-     * tokens have been eaten
-     * @return an Expression AST object that represents the parsed term
-     */
-    private Expression parseTerm()
-    {
-        Expression ret = parseFactor();
-        while (currentToken.equals("*") || currentToken.equals("/"))
-        {
-            String op = currentToken;
-            eat(currentToken);
-            ret = new BinOp(op, ret, parseFactor());
-        }
-        return ret;
     }
 
     /**
@@ -249,17 +152,101 @@ public class Parser
      * associated tokens have been eaten
      * @return an Expression AST object that represents the parsed expression
      */
-    private Expression parseExpr()
+    private Expression parseExpression()
     {
-        Expression ret = parseTerm();
-        while (currentToken.equals("+") || currentToken.equals("-"))
+        Expression ret = parseAddExpr();
+        while (currentToken.equals("<") || currentToken.equals(">") || currentToken.equals(">=") ||
+               currentToken.equals("<=") || currentToken.equals("<>") || currentToken.equals("="))
         {
             String op = currentToken;
             eat(currentToken);
-            ret = new BinOp(op, ret, parseTerm());
+            ret = new BinOp(op, ret, parseAddExpr());
         }
         return ret;
     }
 
+    /**
+     * Parses the current integer addition/subtraction expression
+     *
+     * @precondition currentToken begins an addition/subtraction expression
+     * @postcondition currentToken has advanced past the current addition/subtraction expression,
+     * all of the current addition/subtraction expression's associated tokens have been eaten
+     * @return an Expression AST object that represents the parsed addition/subtraction expression
+     */
+    private Expression parseAddExpr()
+    {
+        Expression ret = parseMultExpr();
+        while (currentToken.equals("+") || currentToken.equals("-"))
+        {
+            String op = currentToken;
+            eat(currentToken);
+            ret = new BinOp(op, ret, parseMultExpr());
+        }
+        return ret;
+    }
 
+    /**
+     * Parses the current integer multiplication/division expression
+     *
+     * @precondition currentToken begins an multiplication/division expression
+     * @postcondition currentToken has advanced past the current multiplication/division expression,
+     * all of the current multiplication/division expression's associated tokens have been eaten
+     * @return an Expression AST object that represents the parsed multiplication/division
+     * expression
+     */
+    private Expression parseMultExpr()
+    {
+        Expression ret = parseNegExpr();
+        while (currentToken.equals("*") || currentToken.equals("/"))
+        {
+            String op = currentToken;
+            eat(currentToken);
+            ret = new BinOp(op, ret, parseNegExpr());
+        }
+        return ret;
+    }
+
+    /**
+     * Parses the value of the current integer term that may be combined with other terms via
+     * addition, subtraction, multiplication, or division
+     *
+     * @precondition currentToken begins an integer term
+     * @postcondition currentToken has advanced past the current integer term, all of the current
+     * integer term's associated tokens have been eaten
+     * @return an Expression AST object that represents the parsed integer term
+     */
+    private Expression parseNegExpr()
+    {
+        if (currentToken.equals("-")) return new BinOp("*", new Number(-1), parseValue());
+        return parseValue();
+    }
+
+    /**
+     * Parses the current integer value, which is a number, variable, or an Expression enclosed in
+     * parentheses
+     *
+     * @precondition currentToken begins an integer value
+     * @postcondition currentToken has advanced past the current integer value, all of the value's
+     * associated tokens have been eaten
+     * @return an Expression AST object that represents the parsed integer value
+     */
+    private Expression parseValue()
+    {
+        if (currentToken.equals("("))
+        {
+            eat("(");
+            Expression ret = parseExpression();
+            eat(")");
+            return ret;
+        }
+        if (currentToken.matches("[0-9]+"))
+        {
+            int numVal = Integer.parseInt(currentToken);
+            eat(currentToken);
+            return new Number(numVal);
+        }
+        String id = currentToken;
+        eat(id);
+        return new Variable(id);
+    }
 }

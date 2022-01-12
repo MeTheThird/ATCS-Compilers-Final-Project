@@ -12,7 +12,7 @@ import scanner.Scanner;
  * addition to testing the parsing and evaluation components of the compiler
  *
  * @author Rohan Thakur
- * @version 1/10/22
+ * @version 1/11/22
  */
 public class ParserTester
 {
@@ -32,11 +32,9 @@ public class ParserTester
             Parser parser = new Parser(scanner);
             Evaluator eval = new Evaluator();
             Environment env = new Environment();
-            Compiler compiler = new Compiler();
 
             Program program = parser.parseProgram();
-            compiler.compile(program, "output.asm");
-            eval.exec(program, env);
+            // eval.exec(program, env);
         }
         catch(FileNotFoundException e)
         {

@@ -4,25 +4,30 @@ package ast;
  * If represents an if statement
  * 
  * @author Rohan Thakur
- * @version 1/10/22
+ * @version 1/11/22
  */
 public class If extends Statement
 {
     private Expression expr;
-    private Statement stmt;
-// TODO: what if the expression doesn't have a relop? then eval to true if it's neq to 0
+    private Program trueProgram;
+    private Program falseProgram;
+
     /**
-     * If constructor for the construction of an if statement with the input expression and input
-     * statement to execute if the expression evaluates to true
+     * If constructor for the construction of an if statement with the input expression, input
+     * program to execute if the expression evaluates to true, and input program to execute if the
+     * expression evaluates to false
      *
      * @param expr the Expression object that represents the input expression
-     * @param stmt the Statement object that represents the input statement to execute if the
+     * @param trueProgram the Program object that represents the program to execute if the
      * expression is true
+     * @param falseProgram the Program object that represents the program to execute if the
+     * expression is false
      */
-    public If(Expression expr, Statement stmt)
+    public If(Expression expr, Program trueProgram, Program falseProgram)
     {
         this.expr = expr;
-        this.stmt = stmt;
+        this.trueProgram = trueProgram;
+        this.falseProgram = falseProgram;
     }
 
     /**
@@ -36,13 +41,24 @@ public class If extends Statement
     }
 
     /**
-     * Gets the If object's statement to execute
+     * Gets the If object's program to execute if the expression is true
      *
-     * @return the Statement object representing the If object's statement to execute should the
+     * @return the Program object representing the If object's program to execute should the
      * expression evaluate to true
      */
-    public Statement getStmt()
+    public Program getTrueProgram()
     {
-        return this.stmt;
+        return this.trueProgram;
+    }
+
+    /**
+     * Gets the If object's program to execute if the expression is false
+     *
+     * @return the Program object representing the If object's program to execute should the
+     * expression evaluate to false
+     */
+    public Program getFalseProgram()
+    {
+        return this.falseProgram;
     }
 }

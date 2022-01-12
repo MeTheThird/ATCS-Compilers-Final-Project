@@ -4,25 +4,25 @@ package ast;
  * While represents a while statement
  *
  * @author Rohan Thakur
- * @version 1/10/22
+ * @version 1/11/22
  */
 public class While extends Statement
 {
     private Expression expr;
-    private Statement stmt;
-// TODO: what if the expression doesn't have a relop? then eval to true if it's neq to 0
+    private Program program;
+
     /**
      * While constructor for the construction of a while statement with the input expression and
-     * input statement to execute while the expression evaluates to true
+     * input program to execute while the expression evaluates to true
      *
      * @param expr the Expression object that represents the input expression
-     * @param stmt the Statement object that represents the input statement to execute while the
-     * expression is true
+     * @param program the Program object that represents the program to execute while the expression
+     * is true
      */
-    public While(Expression expr, Statement stmt)
+    public While(Expression expr, Program program)
     {
         this.expr = expr;
-        this.stmt = stmt;
+        this.program = program;
     }
 
     /**
@@ -36,13 +36,13 @@ public class While extends Statement
     }
 
     /**
-     * Gets the While object's statement to execute
+     * Gets the While object's program to execute
      *
-     * @return the Statement object representing the While object's statement to execute while the
+     * @return the Program object representing the While object's program to execute while the
      * expression evaluates to true
      */
-    public Statement getStmt()
+    public Program getProgram()
     {
-        return this.stmt;
+        return this.program;
     }
 }
