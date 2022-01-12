@@ -98,6 +98,7 @@ public class Parser
      */
     private Statement parseStatement()
     {
+        // System.out.println("Stmt: " + currentToken);
         switch (currentToken)
         {
             case "display":
@@ -154,6 +155,7 @@ public class Parser
      */
     private Expression parseExpression()
     {
+        // System.out.println("Expr: " + currentToken);
         Expression ret = parseAddExpr();
         while (currentToken.equals("<") || currentToken.equals(">") || currentToken.equals(">=") ||
                currentToken.equals("<=") || currentToken.equals("<>") || currentToken.equals("="))
@@ -175,6 +177,7 @@ public class Parser
      */
     private Expression parseAddExpr()
     {
+        // System.out.println("AddExpr: " + currentToken);
         Expression ret = parseMultExpr();
         while (currentToken.equals("+") || currentToken.equals("-"))
         {
@@ -196,6 +199,7 @@ public class Parser
      */
     private Expression parseMultExpr()
     {
+        // System.out.println("MultExpr: " + currentToken);
         Expression ret = parseNegExpr();
         while (currentToken.equals("*") || currentToken.equals("/"))
         {
@@ -217,7 +221,12 @@ public class Parser
      */
     private Expression parseNegExpr()
     {
-        if (currentToken.equals("-")) return new BinOp("*", new Number(-1), parseValue());
+        // System.out.println("NegExpr: " + currentToken);
+        if (currentToken.equals("-"))
+        {
+            eat("-");
+            return new BinOp("*", new Number(-1), parseValue());
+        }
         return parseValue();
     }
 
@@ -232,6 +241,7 @@ public class Parser
      */
     private Expression parseValue()
     {
+        // System.out.println("Value: " + currentToken);
         if (currentToken.equals("("))
         {
             eat("(");
