@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
  * Scanner is a simple scanner for Compilers and Interpreters (2014-2015) lab exercise 1
  * 
  * @author Rohan Thakur
- * @version 1/10/22
+ * @version 1/12/22
  */
 public class Scanner
 {
@@ -240,7 +240,7 @@ public class Scanner
      * 
      * @postcondition advanced to the next lexeme, eof is set to true once the end
      * of the input stream has been reached
-     * @return the next lexeme or "END" if the input stream is at the end of the
+     * @return the next lexeme or "end" if the input stream is at the end of the
      * file
      * @throws ScanErrorException e
      */
@@ -252,7 +252,7 @@ public class Scanner
         if (!hasNext() || currentChar == '.')
         {
             eof = true;
-            return "END";
+            return "end";
         }
 
         if (isDigit(currentChar))
