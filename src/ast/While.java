@@ -8,20 +8,20 @@ package ast;
  */
 public class While extends Statement
 {
-    private Expression expr;
+    private Expression exp;
     private Program program;
 
     /**
      * While constructor for the construction of a while statement with the input expression and
      * input program to execute while the expression evaluates to true
      *
-     * @param expr the Expression object that represents the input expression
+     * @param exp the Expression object that represents the input expression
      * @param program the Program object that represents the program to execute while the expression
      * is true
      */
-    public While(Expression expr, Program program)
+    public While(Expression exp, Program program)
     {
-        this.expr = expr;
+        this.exp = exp;
         this.program = program;
     }
 
@@ -32,7 +32,7 @@ public class While extends Statement
      */
     public Expression getExpression()
     {
-        return this.expr;
+        return this.exp;
     }
 
     /**

@@ -8,7 +8,7 @@ package ast;
  */
 public class If extends Statement
 {
-    private Expression expr;
+    private Expression exp;
     private Program trueProgram;
     private Program falseProgram;
 
@@ -17,15 +17,15 @@ public class If extends Statement
      * program to execute if the expression evaluates to true, and input program to execute if the
      * expression evaluates to false
      *
-     * @param expr the Expression object that represents the input expression
+     * @param exp the Expression object that represents the input expression
      * @param trueProgram the Program object that represents the program to execute if the
      * expression is true
      * @param falseProgram the Program object that represents the program to execute if the
      * expression is false
      */
-    public If(Expression expr, Program trueProgram, Program falseProgram)
+    public If(Expression exp, Program trueProgram, Program falseProgram)
     {
-        this.expr = expr;
+        this.exp = exp;
         this.trueProgram = trueProgram;
         this.falseProgram = falseProgram;
     }
@@ -37,7 +37,7 @@ public class If extends Statement
      */
     public Expression getExpression()
     {
-        return this.expr;
+        return this.exp;
     }
 
     /**
